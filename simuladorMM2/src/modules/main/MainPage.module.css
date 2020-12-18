@@ -1,0 +1,237 @@
+@import url('https://fonts.googleapis.com/css2?family=Limelight&display=swap');
+
+.gridContainer {
+    background-color: white;
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 0.1fr 0.6fr 2.1fr 0.05fr;
+    gap: 5px 5px;
+    grid-template-areas:
+        "header"
+        "params"
+        "statistics"
+        "footer";
+}
+
+.header {
+    grid-area: header;
+    z-index: 2;
+    box-sizing: border-box;
+    border-radius: 0 0 8px 8px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    align-content: center;
+    background: #495057;
+    color: white;
+    font-weight: 700;
+    font-size: 40px;
+    font-family: 'Limelight', cursive;
+}
+
+.params {
+    padding: 1rem;
+    margin-top: 70px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr;
+    gap: 0px 0px;
+    grid-template-areas:
+        "paramsheader paramsheader"
+        "params1 params2"
+        "paramsSubmit paramsSubmit";
+    grid-area: params;  
+}
+
+.paramsheader {
+    grid-area: paramsheader;
+    padding-top: 20px;
+}
+
+.params1 {
+    grid-area: params1;
+}
+
+.params2 {
+    grid-area: params2;
+}
+
+label {
+    padding: 24px 20px 15px 10px;
+    display: inline-block;
+    margin-left: 15px;
+    display: inline-block;
+    width: 220px;
+}
+
+input, select {
+    background-color: white;
+    border: 1px solid #1198cd;
+    border-radius: 5px;
+    color: #495057;
+
+    width: 50%;
+    padding: 10px 20px;
+    box-sizing: border-box;
+}
+
+input[type="submit"] {
+    width: 20%;
+    float: right;
+    margin-right: -495px;
+    margin-top: 20px;
+    display: flex;
+
+    background-color: #4281a4;
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    grid-area: paramsSubmit;
+}
+  
+input[type=submit]:hover {
+    transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+    color: white;
+    border-color: #2198ab;
+    background-color: #1198cd;
+    box-shadow: #495057;
+}
+
+.labelSimulacao {
+    margin-left: 30%;
+}
+
+.tempoSimulacao {
+    width: 20%;
+}
+
+.colInput {
+    float: center;
+    width: 40%;
+}
+
+@media screen and (max-width: 600px) {
+    .col-25, .col-75, input[type=submit] {
+      width: 100%;
+      margin-top: 0;
+    }
+}
+
+.statistics {
+    padding: 1rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 0.7fr 1.3fr;
+    gap: 0px 0px;
+    grid-template-areas:
+      "charts charts"
+      "table table";
+    grid-area: statistics;
+}
+
+.charts {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 0px 0px;
+    grid-template-areas:
+      "chart1 chart2"
+      "chart3 chart4";
+    grid-area: charts;
+}
+
+.chart1, .chart2, .chart3, .chart4 {
+    padding: 1rem;
+    z-index: 1;
+    box-sizing: border-box;
+    border-radius: 1rem;
+    /* background-color: rgba(240, 240, 250, 0.75);
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.25); */
+
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+    font-size: x-large;
+}
+
+.chart1 {
+    grid-area: chart1;
+}
+
+.chart2 {
+    grid-area: chart2;
+}
+
+.chart3 {
+    grid-area: chart3;
+}
+
+.chart4 {
+    grid-area: chart4;
+}
+
+.chartLabels {
+    font-size: 15px;
+    margin-bottom: 10px;
+    text-align: center;
+    color: grey;
+}
+
+.tableContainer {
+    grid-area: table;
+    /* padding: 1rem; */
+    margin-top: 5rem;
+    font-size: x-large;
+}
+
+.tableContainerGrid {
+    height: 700px;
+    width: '100%';
+}
+
+.table {
+    margin-top: 1rem;
+}
+
+.dx-datagrid .dx-row-alt > td {
+    background-color: yellow;
+  }
+
+.MuiDataGrid-columnsContainer {
+    background-color: #17a9b2a2 !important;
+    z-index: 0 !important;
+}
+
+.footer {
+    grid-area: footer;
+    z-index: 2;
+    box-sizing: border-box;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    align-content: center;
+    background: #495057;
+    color: white;
+    font-weight: 700;
+    font-size: medium;
+}
+
+.stats {
+    color: #495057;
+    font-size: large;
+    
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    align-content: center;
+}
+
+a {
+    margin: 5px;
+    text-decoration: none;
+    color:  white;
+}
