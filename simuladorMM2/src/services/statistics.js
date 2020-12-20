@@ -30,5 +30,5 @@ export const tmSistema = function (tcs) {
 }
 
 export const probUmOperadorLivre = function (tl1, tl2, ttotal) {
-    return ((tl1.reduce(reducer) + tl2.reduce(reducer)) / 2*ttotal).toFixed(4);
+    return ( (parseFloat(probOperadorLivre(tl1, ttotal)) *1-(parseFloat(probOperadorLivre(tl2, ttotal))) ) + (parseFloat(probOperadorLivre(tl2, ttotal)) *1-(parseFloat(probOperadorLivre(tl1, ttotal))) ) + (parseFloat(probOperadorLivre(tl1, ttotal)) * (parseFloat(probOperadorLivre(tl2, ttotal))) )  ).toFixed(4);
 }

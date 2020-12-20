@@ -24,7 +24,6 @@ export default function MainPage() {
     const [tempoDeOperadores1Livre, setOperadores1Livre] = useState([]);
     const [tempoDeOperadores2Livre, setOperadores2Livre] = useState([]);
     const [tempoNoSistema, setTempoNoSistema] = useState([]);
-    const [numeroExperimentos, setNumeroExperimentos] = useState(0);
 
     const [tmDeFila, setTmDeFila] = useState(0);
     const [probDeEsperar, setProbDeEsperar] = useState(0);
@@ -39,16 +38,8 @@ export default function MainPage() {
 
     const [dados, setDados] = useState([]);
 
-    function delay(ms) {
-        var cur_d = new Date();
-        var cur_ticks = cur_d.getTime();
-        var ms_passed = 0;
-        while(ms_passed < ms) {
-            var d = new Date();  // Possible memory leak?
-            var ticks = d.getTime();
-            ms_passed = ticks - cur_ticks;
-            // d = null;  // Prevent memory leak?
-        }
+    function timeout(delay) {
+        return new Promise( res => setTimeout(res, delay) );
     }
 
     async function handleSubmit(event) {
@@ -67,16 +58,21 @@ export default function MainPage() {
         let tempoOperadorLivre1 = []
         let tempoOperadorLivre2 = []
         let tmsistema = []
-        let i = 0.0
         let filalivre = parseFloat(tamanhoFila)
 
         while( parseFloat(tfs) <= parseFloat(temposimulacao) ){
-            // if(tipoFila === 'limitada'){
-            //     if(filalivre === 0){
-            //         //tfs1_antes = tfs1_antes +  
-            //         continue;
-            //     }
-            // }
+            if(tipoFila === 'limitada'){
+                if(filalivre === 0){                // todos vao embora até 
+
+                    if(tfs1_antes < tfs2_antes){
+                        tc = tfs1_antes
+                    } else {
+                        tc = tfs2_antes
+                    }
+                   
+                    continue;
+                }
+            }
 
             if ( tipoTec === "exponencial" ) {
                 tecint = parseFloat(exponencialRAND(1 / mediaTEC))
@@ -99,7 +95,6 @@ export default function MainPage() {
                 tcs = parseFloat(tfs1)-parseFloat(tis)
                 tl1 = parseFloat(tecint)
                 tl2 = parseFloat(tecint)
-                i += parseFloat(tfs1)
                 tfs1_antes = parseFloat(tfs1)
 
             } else if (parseInt(experimento) === 2) {       //operador 2 atende
@@ -156,6 +151,7 @@ export default function MainPage() {
                             tl1 = 0.0
                             tl2 = parseFloat(tc)-parseFloat(tfs2_antes)
                             tfs1_antes = parseFloat(tfs1)
+                            filalivre--
                             
                         } else{                                                    //dps da fila é atendido pelo operador 2 
 
@@ -167,6 +163,7 @@ export default function MainPage() {
                             tl1 = parseFloat(tc)-parseFloat(tfs1_antes)
                             tl2 = 0.0
                             tfs2_antes = parseFloat(tfs2)
+                            filalivre--
 
                         }
                     }
@@ -195,14 +192,9 @@ export default function MainPage() {
             tl1 = parseFloat(tl1).toFixed(2)
             tl2 = parseFloat(tl2).toFixed(2)
 
-            console.log(typeof tecint, typeof tc, typeof tf, typeof tis, typeof tfs, typeof tcs, typeof tl1, typeof tl2)
-            console.log(i, experimento,  tecint,  tc,  tf,  tsint, tis,  tfs,  tcs,  tl1,  tl2)
-
             tabela.push({id: experimento, tecint, tc, tf, tsint, tis, tfs, tcs, tl1, tl2})
 
             experimento = parseInt(experimento) + 1
-
-            //delay(5000)
 
             setDados(tabela)
             setTemposNaFila(tmfila)
@@ -210,7 +202,8 @@ export default function MainPage() {
             setOperadores2Livre(tempoOperadorLivre2)
             setTempoNoSistema(tmsistema)
             setTemposDeServico(tmservico)
-            setNumeroExperimentos(parseInt(experimento))
+
+            
 
             setTmDeFila(tmFila(tmfila));
             setProbDeEsperar(probEsperar(tmfila));
@@ -220,6 +213,7 @@ export default function MainPage() {
             setTmDeServico(tmSvc(tmservico));
             setTmNoSistema(tmSistema(tmsistema));
             
+            await timeout(1000)
         }
 
         
@@ -489,9 +483,9 @@ export default function MainPage() {
                         <div>Tempo médio de espera na fila = {tmDeFila} minutos</div>
                         <div>Tempo médio de serviço = {tmDeServico} minutos</div>
                         <div>Tempo médio de cada experimento no sistema = {tmNoSistema} minutos</div>
-                        <div>Probabilidade de esperar na fila = {probDeEsperar}</div>
                         <div>Probabilidade do operador 1 estar livre = {probDeOperadorLivre1}</div>
                         <div>Probabilidade do operador 2 estar livre = {probDeOperadorLivre2}</div>
+                        <div>Probabilidade do cliente chegar e ser atendido = {probAlgumOperadorLivre}</div>
                     </div>
                     <div className={styles.table}>
                         <div className={styles.tableContainerGrid}>
@@ -510,11 +504,14 @@ export default function MainPage() {
                                 { field: 'tl2', headerName: 'TL operador 2', width: 150 },
                             ]}
                             headerHeight={100}
+                            EnableColumnVirtualization="True" 
+                            VirtualizationMode="Recycling"
+                            EnableRowVirtualization="True"
                             />
                         </div>
 
                         <div className={styles.stats}>
-                            <div><b>OBS.: Números negativos nos tempos dos operadores livres indica que o ultimo seviço do mesmo ainda está em andamento.</b></div>
+                            <div><b>OBS.: Número negativo no tempo do operador livre indica que o último seviço do mesmo ainda está em andamento.</b></div>
                         </div>
                     </div>
                 </div>
