@@ -1,2 +1,2 @@
-# Implementação do modelo de fila M/M/1
+# Implementação do modelo de fila M/M/2
 
