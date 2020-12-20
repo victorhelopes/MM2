@@ -39,12 +39,24 @@ export default function MainPage() {
 
     const [dados, setDados] = useState([]);
 
+    function delay(ms) {
+        var cur_d = new Date();
+        var cur_ticks = cur_d.getTime();
+        var ms_passed = 0;
+        while(ms_passed < ms) {
+            var d = new Date();  // Possible memory leak?
+            var ticks = d.getTime();
+            ms_passed = ticks - cur_ticks;
+            // d = null;  // Prevent memory leak?
+        }
+    }
+
     async function handleSubmit(event) {
         event.preventDefault();
 
         let tabela = []
         let tc = 0.0, tf = 0.0, tis = 0.0, tfs = 0.0, tfs1 = 0.0, tfs2 = 0.0, tcs = 0.0, tl1 = 0.0, tl2 = 0.0
-        let tl1_antes, tl2_antes, tc_antes = 0.0, tfs1_antes = 0.0, tfs2_antes = 0.0
+        let tc_antes = 0.0, tfs1_antes = 0.0, tfs2_antes = 0.0
         let experimento = 1
         let temposimulacao = parseFloat(tempoSim)
         let tecint = parseFloat(tec)
@@ -89,8 +101,6 @@ export default function MainPage() {
                 tl2 = parseFloat(tecint)
                 i += parseFloat(tfs1)
                 tfs1_antes = parseFloat(tfs1)
-                tl1_antes = parseFloat(tl1)
-                tl2_antes = parseFloat(tl2)
 
             } else if (parseInt(experimento) === 2) {       //operador 2 atende
 
@@ -103,8 +113,6 @@ export default function MainPage() {
                 tl1 = parseFloat(tc) - parseFloat(tfs1_antes)
                 tl2 = parseFloat(tc)
                 tfs2_antes = parseFloat(tfs2)
-                tl1_antes = parseFloat(tl1)
-                tl2_antes = parseFloat(tl2)
             }
             
             else {                                        //todas as outras iteracoes
@@ -118,11 +126,9 @@ export default function MainPage() {
                     tfs1 = parseFloat(tis)+parseFloat(tsint)
                     tfs = parseFloat(tfs1)
                     tcs = parseFloat(tfs1)-parseFloat(tis)
-                    tl1 = parseFloat(tl1_antes)+parseFloat(tis)-parseFloat(tfs1_antes)
-                    tl2 = parseFloat(tl2_antes)+parseFloat(tis)-parseFloat(tfs2_antes)
+                    tl1 = parseFloat(tc)-parseFloat(tfs1_antes)
+                    tl2 = parseFloat(tc)-parseFloat(tfs2_antes)
                     tfs1_antes = parseFloat(tfs1)
-                    tl1_antes = parseFloat(tl1)
-                    tl2_antes = parseFloat(tl2)
                     
                 } else {                                                // operador 2 vai atender
                     if ( parseFloat(tfs2_antes) <= parseFloat(tc) ) {
@@ -133,11 +139,9 @@ export default function MainPage() {
                         tfs = parseFloat(tfs2)
                         tcs = parseFloat(tfs2)-parseFloat(tis)
 
-                        tl1 = parseFloat(tl1_antes)+parseFloat(tis)-parseFloat(tfs1_antes)
-                        tl2 = parseFloat(tl2_antes)+parseFloat(tis)-parseFloat(tfs2_antes)
+                        tl1 = parseFloat(tc)-parseFloat(tfs1_antes)
+                        tl2 = parseFloat(tc)-parseFloat(tfs2_antes)
                         tfs2_antes = parseFloat(tfs2)
-                        tl1_antes = parseFloat(tl1)
-                        tl2_antes = parseFloat(tl2)
 
 
                     } else {                                            // cliente vai pra fila, nenhum operador livre
@@ -150,10 +154,8 @@ export default function MainPage() {
                             tfs = tfs1
                             tcs = parseFloat(tfs1)-parseFloat(tis)+parseFloat(tf)
                             tl1 = 0.0
-                            tl2 = parseFloat(tl2_antes)+parseFloat(tis)-parseFloat(tfs2_antes)
+                            tl2 = parseFloat(tc)-parseFloat(tfs2_antes)
                             tfs1_antes = parseFloat(tfs1)
-                            tl1_antes = parseFloat(tl1)
-                            tl2_antes = parseFloat(tl2)
                             
                         } else{                                                    //dps da fila é atendido pelo operador 2 
 
@@ -162,11 +164,9 @@ export default function MainPage() {
                             tfs2 = parseFloat(tis)+parseFloat(tsint)+tf
                             tfs = tfs2
                             tcs = parseFloat(tfs2)-parseFloat(tis)+parseFloat(tf)
-                            tl1 = parseFloat(tl1_antes)+parseFloat(tis)-parseFloat(tfs1_antes)
+                            tl1 = parseFloat(tc)-parseFloat(tfs1_antes)
                             tl2 = 0.0
                             tfs2_antes = parseFloat(tfs2)
-                            tl1_antes = parseFloat(tl1)
-                            tl2_antes = parseFloat(tl2)
 
                         }
                     }
@@ -202,23 +202,27 @@ export default function MainPage() {
 
             experimento = parseInt(experimento) + 1
 
+            //delay(5000)
+
+            setDados(tabela)
+            setTemposNaFila(tmfila)
+            setOperadores1Livre(tempoOperadorLivre1)
+            setOperadores2Livre(tempoOperadorLivre2)
+            setTempoNoSistema(tmsistema)
+            setTemposDeServico(tmservico)
+            setNumeroExperimentos(parseInt(experimento))
+
+            setTmDeFila(tmFila(tmfila));
+            setProbDeEsperar(probEsperar(tmfila));
+            setProbDeOperadorLivre1(probOperadorLivre(tempoOperadorLivre1, tfs));
+            setProbDeOperadorLivre2(probOperadorLivre(tempoOperadorLivre2, tfs));
+            setProbAlgumOperadorLivre(probUmOperadorLivre(tempoOperadorLivre1, tempoOperadorLivre2, tfs));
+            setTmDeServico(tmSvc(tmservico));
+            setTmNoSistema(tmSistema(tmsistema));
+            
         }
 
-        setDados(tabela)
-        setTemposNaFila(tmfila)
-        setOperadores1Livre(tempoOperadorLivre1)
-        setOperadores2Livre(tempoOperadorLivre2)
-        setTempoNoSistema(tmsistema)
-        setTemposDeServico(tmservico)
-        setNumeroExperimentos(parseInt(experimento))
-
-        setTmDeFila(tmFila(tmfila));
-        setProbDeEsperar(probEsperar(tmfila));
-        setProbDeOperadorLivre1(probOperadorLivre(tempoOperadorLivre1, tfs));
-        setProbDeOperadorLivre2(probOperadorLivre(tempoOperadorLivre2, tfs));
-        setProbAlgumOperadorLivre(probUmOperadorLivre(tempoOperadorLivre1, tempoOperadorLivre2, tfs));
-        setTmDeServico(tmSvc(tmservico));
-        setTmNoSistema(tmSistema(tmsistema));
+        
     }
 
     function handleChangeTipoTEC(value) {
@@ -259,7 +263,7 @@ export default function MainPage() {
 
     return (
         <div className={styles.gridContainer}>
-            <div className={styles.header}>Simulador MM1</div>
+            <div className={styles.header}>Simulador MM2</div>
 
             <form onSubmit={handleSubmit} className={styles.params}>
                 <div className={styles.paramsheader}>
