@@ -4,7 +4,7 @@ import { DataGrid } from '@material-ui/data-grid';
 import Chart from 'react-apexcharts';
 import { barOptions } from './chart-options';
 import { exponencialRAND, normalRAND } from '../../services/randomVar';
-import { tmFila, probEsperar, probOperadorLivre, tmSvc, tmSistema } from '../../services/statistics';
+import { tmFila, probEsperar, probOperadorLivre, tmSvc, tmSistema, probUmOperadorLivre } from '../../services/statistics';
 
 export default function MainPage() {
     const [tempoSim, setTempo] = useState(0);
@@ -30,8 +30,12 @@ export default function MainPage() {
     const [probDeEsperar, setProbDeEsperar] = useState(0);
     const [probDeOperadorLivre1, setProbDeOperadorLivre1] = useState(0);
     const [probDeOperadorLivre2, setProbDeOperadorLivre2] = useState(0);
+    const [probAlgumOperadorLivre, setProbAlgumOperadorLivre] = useState(0);
     const [tmDeServico, setTmDeServico] = useState(0);
     const [tmNoSistema, setTmNoSistema] = useState(0);
+
+    const [tamanhoFila, setTamanhoFila] = useState(0);
+    const [tipoFila, setTipoFila] = useState('');
 
     const [dados, setDados] = useState([]);
 
@@ -39,19 +43,29 @@ export default function MainPage() {
         event.preventDefault();
 
         let tabela = []
-        let tc = 0.0, tf = 0.0, tis = 0.0, tfs = 0.0, tcs = 0.0, tl1 = 0.0, tl2 = 0.0, tc_antes = 0.0, tfs1_antes = 0.0, tfs2_antes = 0.0
+        let tc = 0.0, tf = 0.0, tis = 0.0, tfs = 0.0, tfs1 = 0.0, tfs2 = 0.0, tcs = 0.0, tl1 = 0.0, tl2 = 0.0
+        let tl1_antes, tl2_antes, tc_antes = 0.0, tfs1_antes = 0.0, tfs2_antes = 0.0
         let experimento = 1
         let temposimulacao = parseFloat(tempoSim)
         let tecint = parseFloat(tec)
         let tsint = parseFloat(ts)
         let tmfila = []
+        
         let tmservico = []
         let tempoOperadorLivre1 = []
         let tempoOperadorLivre2 = []
         let tmsistema = []
-        let i = 0
+        let i = 0.0
+        let filalivre = parseFloat(tamanhoFila)
 
-        while( i <= parseFloat(temposimulacao) ){
+        while( parseFloat(tfs) <= parseFloat(temposimulacao) ){
+            // if(tipoFila === 'limitada'){
+            //     if(filalivre === 0){
+            //         //tfs1_antes = tfs1_antes +  
+            //         continue;
+            //     }
+            // }
+
             if ( tipoTec === "exponencial" ) {
                 tecint = parseFloat(exponencialRAND(1 / mediaTEC))
             } else if ( tipoTec === "normal" ) {
@@ -61,63 +75,115 @@ export default function MainPage() {
                 tsint = parseFloat(exponencialRAND(1 / mediaTS))
             } else if ( tipoTs === "normal" ) {
                 tsint = parseFloat(normalRAND(mediaTS, varianciaTS))
-            } 
-///tc = tempo de entrada do cliente
+            }
 
-            if ( i === 0 ) {
-                tc = tecint
+            if ( parseInt(experimento) === 1 ) {            //primeira iteracao
+                                                            //operador 1 atende  
+                tc = parseFloat(tecint)                     
                 tf = 0.0
-                tis = tecint
-                tfs = parseFloat(tecint)+parseFloat(tsint)
-                tcs = parseFloat(tfs)-parseFloat(tis)
-                tl1 = tecint
-                tl2 = tecint 
-                tc_antes = parseFloat(tc)
-            } else {
+                tis = parseFloat(tecint)
+                tfs1 = parseFloat(tecint)+parseFloat(tsint)
+                tfs = tfs1
+                tcs = parseFloat(tfs1)-parseFloat(tis)
+                tl1 = parseFloat(tecint)
+                tl2 = parseFloat(tecint)
+                i += parseFloat(tfs1)
+                tfs1_antes = parseFloat(tfs1)
+                tl1_antes = parseFloat(tl1)
+                tl2_antes = parseFloat(tl2)
+
+            } else if (parseInt(experimento) === 2) {       //operador 2 atende
+
+                tc = parseFloat(tecint) + parseFloat(tc_antes)
+                tf = 0.0
+                tis = parseFloat(tecint)
+                tfs2 = parseFloat(tc)+parseFloat(tsint)
+                tfs = tfs2
+                tcs = parseFloat(tfs2)-parseFloat(tis)
+                tl1 = parseFloat(tc) - parseFloat(tfs1_antes)
+                tl2 = parseFloat(tc)
+                tfs2_antes = parseFloat(tfs2)
+                tl1_antes = parseFloat(tl1)
+                tl2_antes = parseFloat(tl2)
+            }
+            
+            else {                                        //todas as outras iteracoes
+
                 tc = parseFloat(tc_antes)+parseFloat(tecint)
 
-                if ( tfs1_antes < tc ) {
-                    tfs1_antes = parseFloat(tfs)
-                    tc_antes = parseFloat(tc)
-                    tmfila.push(parseFloat(tf).toFixed(2))
-                    tmservico.push(parseFloat(tsint).toFixed(2))
-                    tempoOperadorLivre1.push(parseFloat(tl1).toFixed(2))
-                    tempoOperadorLivre2.push(parseFloat(tl2).toFixed(2))
-                    tmsistema.push(parseFloat(tcs).toFixed(2))
-                    tl1 = parseFloat(tc)-parseFloat(tfs1_antes)
-                    tl2 = parseFloat(tc)-parseFloat(tfs2_antes)
-                    if(tl2 < 0){tl2 = 0.0}
+                if ( parseFloat(tfs1_antes) <= parseFloat(tc) ) {          // operador 1 vai atender
+
                     tf = 0.0
-                } else {
-                    if ( tfs2_antes < tc ) {
-                        tfs2_antes = parseFloat(tfs)
-                        tc_antes = parseFloat(tc)
-                        tmfila.push(parseFloat(tf).toFixed(2))
-                        tmservico.push(parseFloat(tsint).toFixed(2))
-                        tempoOperadorLivre1.push(parseFloat(tl1).toFixed(2))
-                        tempoOperadorLivre2.push(parseFloat(tl2).toFixed(2))
-                        tmsistema.push(parseFloat(tcs).toFixed(2))
-                        tl1 = parseFloat(tc)-parseFloat(tfs1_antes)
-                        tl2 = parseFloat(tc)-parseFloat(tfs2_antes)
-                        if(tl1 < 0){tl1 = 0.0}
+                    tis = parseFloat(tc)
+                    tfs1 = parseFloat(tis)+parseFloat(tsint)
+                    tfs = parseFloat(tfs1)
+                    tcs = parseFloat(tfs1)-parseFloat(tis)
+                    tl1 = parseFloat(tl1_antes)+parseFloat(tis)-parseFloat(tfs1_antes)
+                    tl2 = parseFloat(tl2_antes)+parseFloat(tis)-parseFloat(tfs2_antes)
+                    tfs1_antes = parseFloat(tfs1)
+                    tl1_antes = parseFloat(tl1)
+                    tl2_antes = parseFloat(tl2)
+                    
+                } else {                                                // operador 2 vai atender
+                    if ( parseFloat(tfs2_antes) <= parseFloat(tc) ) {
+                    
                         tf = 0.0
-                    } else {
-                        if( tfs1_antes < tfs2_antes){
+                        tis = parseFloat(tc)
+                        tfs2 = parseFloat(tis)+parseFloat(tsint)
+                        tfs = parseFloat(tfs2)
+                        tcs = parseFloat(tfs2)-parseFloat(tis)
+
+                        tl1 = parseFloat(tl1_antes)+parseFloat(tis)-parseFloat(tfs1_antes)
+                        tl2 = parseFloat(tl2_antes)+parseFloat(tis)-parseFloat(tfs2_antes)
+                        tfs2_antes = parseFloat(tfs2)
+                        tl1_antes = parseFloat(tl1)
+                        tl2_antes = parseFloat(tl2)
+
+
+                    } else {                                            // cliente vai pra fila, nenhum operador livre
+
+                        if( parseFloat(tfs1_antes) <= parseFloat(tfs2_antes)){      //dps da fila é atendido pelo operador 1
+
                             tf = parseFloat(tfs1_antes)-parseFloat(tc)
-                            tl1 = parseFloat(tc)-parseFloat(tfs1_antes)
-                        } else{
+                            tis = parseFloat(tc)+parseFloat(tf)
+                            tfs1 = parseFloat(tis)+parseFloat(tsint)+tf
+                            tfs = tfs1
+                            tcs = parseFloat(tfs1)-parseFloat(tis)+parseFloat(tf)
+                            tl1 = 0.0
+                            tl2 = parseFloat(tl2_antes)+parseFloat(tis)-parseFloat(tfs2_antes)
+                            tfs1_antes = parseFloat(tfs1)
+                            tl1_antes = parseFloat(tl1)
+                            tl2_antes = parseFloat(tl2)
+                            
+                        } else{                                                    //dps da fila é atendido pelo operador 2 
+
                             tf = parseFloat(tfs2_antes)-parseFloat(tc)
-                            tl2 = parseFloat(tc)-parseFloat(tfs2_antes)
+                            tis = parseFloat(tc)+parseFloat(tf)
+                            tfs2 = parseFloat(tis)+parseFloat(tsint)+tf
+                            tfs = tfs2
+                            tcs = parseFloat(tfs2)-parseFloat(tis)+parseFloat(tf)
+                            tl1 = parseFloat(tl1_antes)+parseFloat(tis)-parseFloat(tfs1_antes)
+                            tl2 = 0.0
+                            tfs2_antes = parseFloat(tfs2)
+                            tl1_antes = parseFloat(tl1)
+                            tl2_antes = parseFloat(tl2)
+
                         }
-                        
                     }
                 }
-
-                tis = parseFloat(tc)+parseFloat(tf)
-                tfs = parseFloat(tis)+parseFloat(tsint)
-                
-                tcs = parseFloat(tfs)-parseFloat(tis)+parseFloat(tf)
             }
+
+            tc_antes = parseFloat(tc)
+            tmfila.push(parseFloat(tf).toFixed(2))
+            tmservico.push(parseFloat(tsint).toFixed(2))
+            if(tl1 >= 0){
+                tempoOperadorLivre1.push(parseFloat(tl1).toFixed(2))
+            }
+            if(tl2 >= 0){
+                tempoOperadorLivre2.push(parseFloat(tl2).toFixed(2))
+            }
+            
+            tmsistema.push(parseFloat(tcs).toFixed(2))
 
             tecint = parseFloat(tecint).toFixed(2)
             tc = parseFloat(tc).toFixed(2)
@@ -130,10 +196,10 @@ export default function MainPage() {
             tl2 = parseFloat(tl2).toFixed(2)
 
             console.log(typeof tecint, typeof tc, typeof tf, typeof tis, typeof tfs, typeof tcs, typeof tl1, typeof tl2)
+            console.log(i, experimento,  tecint,  tc,  tf,  tsint, tis,  tfs,  tcs,  tl1,  tl2)
 
             tabela.push({id: experimento, tecint, tc, tf, tsint, tis, tfs, tcs, tl1, tl2})
 
-            i = parseFloat(i) + parseFloat(tcs)
             experimento = parseInt(experimento) + 1
 
         }
@@ -148,8 +214,9 @@ export default function MainPage() {
 
         setTmDeFila(tmFila(tmfila));
         setProbDeEsperar(probEsperar(tmfila));
-        setProbDeOperadorLivre1(probOperadorLivre(tempoOperadorLivre1, tempoSim));
-        setProbDeOperadorLivre2(probOperadorLivre(tempoOperadorLivre2, tempoSim));
+        setProbDeOperadorLivre1(probOperadorLivre(tempoOperadorLivre1, tfs));
+        setProbDeOperadorLivre2(probOperadorLivre(tempoOperadorLivre2, tfs));
+        setProbAlgumOperadorLivre(probUmOperadorLivre(tempoOperadorLivre1, tempoOperadorLivre2, tfs));
         setTmDeServico(tmSvc(tmservico));
         setTmNoSistema(tmSistema(tmsistema));
     }
@@ -186,6 +253,10 @@ export default function MainPage() {
         setVarianciaTS(parseFloat(value));
     }
     
+    function handleChangeTipoFila(value) {
+        setTipoFila(value);
+    }
+
     return (
         <div className={styles.gridContainer}>
             <div className={styles.header}>Simulador MM1</div>
@@ -196,10 +267,34 @@ export default function MainPage() {
                     <input 
                     placeholder="em minutos"
                     type="number"
+                    min="1"
+                    max="999"
                     className={styles.tempoSimulacao} 
-                    id="tempoSim" value={tempoSim} 
-                    onChange={e => setTempo(e.target.value)} 
+                    id="tempoSim"
+                    onChange={e => setTempo(parseFloat(e.target.value))} 
                     />
+
+                    <label className={styles.labelSimulacao}>Tamanho máximo da fila</label>
+
+                    <select className={styles.tempoSimulacao} onChange={e => handleChangeTipoFila(e.target.value)}>
+                        <option id="tamfila1" name="tipoFila" defaultValue="">Selecione...</option>
+                        <option id="tamfila2" name="tipoFila" value="ilimitada">Ilimitada</option>
+                        <option id="tamfila3" name="tipoFila" value="limitada">Limitada</option>
+                    </select>
+
+                    {tipoFila === "limitada" &&
+                         <div>
+                            <label className={styles.labelSimulacao}>Tamanho máximo</label>
+                            <input
+                            className={styles.tempoSimulacao}
+                            type="number"
+                            min="0"
+                            max="999"
+                            placeholder="" 
+                            onChange={e => setTamanhoFila(e.target.value)}/>
+                        </div>
+                    }   
+
                 </div>
 
                 <div className={styles.params1}>
@@ -208,10 +303,10 @@ export default function MainPage() {
                     <div>
                         <label>Tempo entre Chegadas</label>
                         <select className={styles.colInput} onChange={e => handleChangeTipoTEC(e.target.value)}>
-                            <option id="tipoTec" name="tipoTec" defaultValue="">Selecione...</option>
-                            <option id="tipoTec" name="tipoTec" value="deterministico">Determinístico</option>
-                            <option id="tipoTec" name="tipoTec" value="normal">Aleatório Normal</option>
-                            <option id="tipoTec" name="tipoTec" value="exponencial">Aleatório Exponencial</option>
+                            <option id="tipoTec1" name="tipoTec" defaultValue="">Selecione...</option>
+                            <option id="tipoTec2" name="tipoTec" value="deterministico">Determinístico</option>
+                            <option id="tipoTec3" name="tipoTec" value="normal">Aleatório Normal</option>
+                            <option id="tipoTec4" name="tipoTec" value="exponencial">Aleatório Exponencial</option>
                         </select>
                     </div>
 
@@ -224,7 +319,7 @@ export default function MainPage() {
                             min="1"
                             max="999"
                             placeholder="(tempo em minutos)" 
-                            onChange={e => handleChangeTEC(e.target.value)}
+                            onChange={e => handleChangeTEC(parseFloat(e.target.value))}
                             />
                         </div>
                     }
@@ -286,7 +381,7 @@ export default function MainPage() {
                             min="1"
                             max="999"
                             placeholder="(tempo em minutos)" 
-                            onChange={e => handleChangeTS(e.target.value)}/>
+                            onChange={e => handleChangeTS(parseFloat(e.target.value))}/>
                         </div>
                     }
                     {tipoTs === "exponencial" &&
@@ -341,7 +436,7 @@ export default function MainPage() {
                             type="bar"
                             width="100%"
                             height="400"
-                            series={[{ data: tempoDeOperadores1Livre}, { data : tempoDeOperadores2Livre}]}
+                            series={[{ data: tempoDeOperadores1Livre, name: "Operador 1"}, { data : tempoDeOperadores2Livre, color: "#1aafff", name: "Operador 2"}]}
                         />
 
                     </div>
@@ -404,14 +499,18 @@ export default function MainPage() {
                                 { field: 'tc', headerName: 'T chegada no relogio', width: 150 },
                                 { field: 'tf', headerName: 'T de fila', width: 100 },
                                 { field: 'tsint', headerName: 'T de serviço', width: 110 },
-                                { field: 'tis', headerName: 'T inicial do serviço no relogio', width: 170 },
-                                { field: 'tfs', headerName: 'T final do serviço no relogio', width: 170 },
-                                { field: 'tcs', headerName: 'T do cliente no sistema', width: 160 },
-                                { field: 'tl1', headerName: 'T livre do operador 1', width: 150 },
-                                { field: 'tl2', headerName: 'T livre do operador 2', width: 150 },
+                                { field: 'tis', headerName: 'Ti serviço no relogio', width: 170 },
+                                { field: 'tfs', headerName: 'Tf serviço no relogio', width: 170 },
+                                { field: 'tcs', headerName: 't cliente no sistema', width: 160 },
+                                { field: 'tl1', headerName: 'TL operador 1', width: 150 },
+                                { field: 'tl2', headerName: 'TL operador 2', width: 150 },
                             ]}
                             headerHeight={100}
                             />
+                        </div>
+
+                        <div className={styles.stats}>
+                            <div><b>OBS.: Números negativos nos tempos dos operadores livres indica que o ultimo seviço do mesmo ainda está em andamento.</b></div>
                         </div>
                     </div>
                 </div>

@@ -28,3 +28,7 @@ export const tmSvc = function (ts) {
 export const tmSistema = function (tcs) {
     return ((tcs.reduce(reducer)) / tcs.length).toFixed(4);
 }
+
+export const probUmOperadorLivre = function (tl1, tl2, ttotal) {
+    return ((tl1.reduce(reducer) + tl2.reduce(reducer)) / 2*ttotal).toFixed(4);
+}
